@@ -235,9 +235,9 @@ public class DynamicVmSubmitionWithSimulationRunning {
     private void createVmAndCloudlet() {
     	System.out.println("creadAndSubmit is working");
 		//1. create vms and cloudlets
-		EntityCreator ec = new EntityCreator();
+		EntityCreator ec = new EntityCreator("empty");
 		//2. add them to the list
-		vmList.addAll(ec.readVmAndCloudlet(VMS));
+		vmList.addAll(ec.readVmAndCloudlet());
 		cloudletList.addAll(ec.getCloudlet());
     }
 

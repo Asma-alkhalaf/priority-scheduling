@@ -2,9 +2,11 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Random;
 import java.util.Scanner;
+import java.util.function.Function;
 
 import org.cloudbus.cloudsim.asmaUtil.Constants;
 import org.cloudbus.cloudsim.cloudlets.Cloudlet;
@@ -20,7 +22,11 @@ public class EntityCreator {
     private final static String COMMA_DELIMITER = ",";
     private final Random RAND = new Random();
 	private List<Cloudlet> cloudletList;
-
+	private String datasetPath;
+	
+	public EntityCreator(String datasetPath) {
+		this.datasetPath = datasetPath;
+	}
 	
     List<Vm> readVms(int vmCount, int submissionDelay1) {
 
@@ -113,12 +119,13 @@ public class EntityCreator {
 		return cloudletList;
 	}
 	
-	public List<Vm> readVmAndCloudlet(int count){
+	public List<Vm> readVmAndCloudlet(){
 		System.out.println("readVmandCloudlet is called");
-		final List<Vm> list = new ArrayList<>(count);
-		cloudletList = new ArrayList<>(count);
+		final List<Vm> list = new ArrayList<>();
+		cloudletList = new ArrayList<>();
 		
-		String fileName = Constants.VM_CLOUDLET_DATASET;
+		//String fileName = Constants.VM_CLOUDLET_DATASET;
+		String fileName = datasetPath;
 		try {  
 
 		BufferedReader br = new BufferedReader(new FileReader(fileName));
@@ -132,24 +139,98 @@ public class EntityCreator {
 			int ram = parseInt(values[2]);
 			int bw = parseInt(values[3]);
 			int size = parseInt(values[4]);
-			//int priority = RAND.nextInt(2); // assign random priority
 			int submissionDelay = parseInt(values[5]);
 			int priority = parseInt(values[9]);
+			int token = parseInt(values[10]);
+
 			
 			// read cloudlet values
 			long clMips = (long) parseDouble(values[6]);
 			int fileSize = (int) parseDouble(values[7]);
 			int clPes = parseInt(values[8]);
 			
-			final Vm vm = new VmSimple(mips, pes, priority, 'a');
+			final VmSimple vm = new VmSimple(mips, pes, priority, 'a');
 			vm.setRam(ram).setBw(bw).setSize(size)
 			.setSubmissionDelay(submissionDelay);
+			vm.setToken(token);
 			list.add(vm);
-
+			
 			// now add the cloudlet to the vm
 			cloudletList.add(createCloudlet(vm, clMips, fileSize, clPes));
 		}
+		}catch(Exception e) {e.printStackTrace();}
+		
+		return list;
+		}
 
+		public List<Vm> readVmAndCloudletAndSort(){
+			System.out.println("readVmandCloudlet is called");
+			final List<Vm> list = new ArrayList<>();
+			cloudletList = new ArrayList<>();
+						
+			//String fileName = Constants.VM_CLOUDLET_DATASET;
+			String fileName = datasetPath;
+			try {  
+
+			BufferedReader br = new BufferedReader(new FileReader(fileName));
+			String nextLine = br.readLine();
+			int currentSubmissionDelay = 0;
+			int oldSubmissionDelay = 0;
+			boolean sameTimeDataset = true; // all arrived at same time
+
+				final List<VmSimple> sameTimeVmsList = new ArrayList<>();
+				int i =0;
+				while((nextLine = br.readLine()) != null ) {
+					
+				String[] values = nextLine.split(COMMA_DELIMITER);
+				
+				//read vm values
+				double mips = parseDouble(values[0]);
+				int pes = parseInt(values[1]);
+				int ram = parseInt(values[2]);
+				int bw = parseInt(values[3]);
+				int size = parseInt(values[4]);
+				int submissionDelay = parseInt(values[5]);
+				int priority = parseInt(values[9]);
+				int token = parseInt(values[10]);
+				
+				// read cloudlet values
+				long clMips = (long) parseDouble(values[6]);
+				int fileSize = (int) parseDouble(values[7]);
+				int clPes = parseInt(values[8]);
+				
+				final VmSimple vm = new VmSimple(mips, pes, priority, 'a');
+				vm.setRam(ram).setBw(bw).setSize(size)
+				.setSubmissionDelay(submissionDelay);
+				vm.setToken(token);
+				currentSubmissionDelay = submissionDelay;
+
+				// now add the cloudlet to the vm
+				cloudletList.add(createCloudlet(vm, clMips, fileSize, clPes));
+				
+				if(oldSubmissionDelay == currentSubmissionDelay) {
+					sameTimeVmsList.add(vm);
+					continue;
+				}
+				sameTimeDataset = false;
+				oldSubmissionDelay = currentSubmissionDelay;
+				
+				//sort the sublist
+				sameTimeVmsList.sort(Comparator.comparing(VmSimple::getPriority).reversed());
+
+				//add the sublist to the list
+				list.addAll(sameTimeVmsList);
+				sameTimeVmsList.clear();
+				
+				// add that last vm
+				sameTimeVmsList.add(vm);
+
+			}
+				//in case all vms arrive at the same time
+			if(sameTimeDataset) {
+				sameTimeVmsList.sort(Comparator.comparing(VmSimple::getPriority).reversed());
+				list.addAll(sameTimeVmsList);
+			}
 		
 		}catch(Exception e) {e.printStackTrace();}
 		

@@ -57,7 +57,7 @@ public class BasicFirstExample {
     private static final int HOSTS = 4;
     private static final int HOST_PES = 8;
 
-    private static final int VMS = 8;
+    private static final int VMS = 10;
     private static final int VM_PES = 4;
 
     private static final int CLOUDLETS = 4;
