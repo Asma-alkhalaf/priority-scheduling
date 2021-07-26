@@ -6,6 +6,7 @@ import java.util.Random;
 import java.util.Scanner;
 
 import org.cloudbus.cloudsim.allocationpolicies.VmAllocationPolicyPriority;
+import org.cloudbus.cloudsim.allocationpolicies.VmAllocationPolicyRoundRobin;
 import org.cloudbus.cloudsim.allocationpolicies.VmAllocationPolicy;
 import org.cloudbus.cloudsim.allocationpolicies.VmAllocationPolicyAbstract;
 import org.cloudbus.cloudsim.allocationpolicies.VmAllocationPolicySimple;
@@ -96,6 +97,7 @@ public class LargeDatasetExample {
 		switch (schedulingAlg) {
 		case "p": vmAllocation = new VmAllocationPolicyPriority(); algorithm = Constants.PRIORITY; break;
 		case "fcfs": vmAllocation = new VmAllocationPolicySimple(); algorithm = Constants.FCFS; break;
+		case "rr": vmAllocation = new VmAllocationPolicyRoundRobin(); algorithm = Constants.RR; break;
 		default:
 		}
 		
