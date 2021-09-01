@@ -1,4 +1,5 @@
 /*
+
  * CloudSim Plus: A modern, highly-extensible and easier-to-use Framework for
  * Modeling and Simulation of Cloud Computing Infrastructures and Services.
  * http://cloudsimplus.org
@@ -72,6 +73,9 @@ public class SelectNextDatacenterExample {
     private List<Cloudlet> cloudletList;
     private List<Datacenter> datacenterList;
     private long lastHostId;
+    
+    // edit by Asma
+    private int submissionDelay = 0;
 
     public static void main(String[] args) {
         new SelectNextDatacenterExample();
@@ -158,9 +162,10 @@ public class SelectNextDatacenterExample {
             //Uses a CloudletSchedulerTimeShared by default to schedule Cloudlets
             final Vm vm = new VmSimple(1000, VM_PES);
             vm.setRam(512).setBw(1000).setSize(10000);
+            vm.setSubmissionDelay(submissionDelay);
             list.add(vm);
         }
-
+        submissionDelay+=3;
         return list;
     }
 
